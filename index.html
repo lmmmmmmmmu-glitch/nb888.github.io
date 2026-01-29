@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>极简端对端聊天</title>
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局重置 & 变量 */
+        :root {
+            --bg-main: #ffffff;
+            --bg-secondary: #f9fafb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --border: #e5e7eb;
+            --radius: 8px;
+            --radius-sm: 4px;
+            --radius-lg: 12px;
+            --transition: all 0.2s ease;
+            --gap-sm: 8px;
+            --gap-md: 12px;
+            --gap-lg: 16px;
+            --padding-sm: 8px;
+            --padding-md: 12px;
+            --padding-lg: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 8px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--bg-main);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            height: calc(100vh - 16px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部 */
+        .header {
+            padding: var(--padding-md) var(--padding-lg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--gap-sm);
+        }
+
+        .status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+
+        .status.connected {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .status.disconnected {
+            color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .status.connecting {
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* 配置区 */
+        .config {
+            padding: var(--padding-md) var(--padding-lg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--gap-md);
+            align-items: center;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .input {
+            width: 100%;
+            padding: var(--padding-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .input:read-only {
+            background: var(--bg-secondary);
+            color: var(--accent);
+        }
+
+        /* 按钮样式 - 极简扁平 */
+        .btn {
+            padding: var(--padding-md) var(--padding-lg);
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--gap-sm);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .btn-icon {
+            padding: var(--padding-md);
+            border-radius: var(--radius);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 聊天区域 */
+        .chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: var(--padding-lg);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap-lg);
+            margin-bottom: var(--gap-md);
+        }
+
+        /* 滚动条极简样式 */
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* 消息样式 - 极简气泡 */
+        .message {
+            max-width: 75%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-self {
+            align-self: flex-end;
+        }
+
+        .message-other {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            padding: var(--padding-md) var(--padding-lg);
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-self .message-content {
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: var(--radius-sm);
+        }
+
+        .message-other .message-content {
+            background: var(--bg-secondary);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .message-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            align-self: flex-end;
+        }
+
+        .message-other .message-meta {
+            align-self: flex-start;
+        }
+
+        /* 媒体消息 */
+        .media {
+            max-width: 220px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .media-img, .media-video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .media-video {
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        /* 输入区域 - 极简 */
+        .chat-input-area {
+            display: flex;
+            gap: var(--gap-sm);
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: var(--padding-md);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .icon-btn {
+            font-size: 18px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            color: var(--accent);
+            background: var(--bg-secondary);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: var(--padding-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+            font-size: 14px;
+            resize: none;
+            height: 40px;
+            max-height: 120px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+        }
+
+        .chat-input:focus {
+            border-color: var(--accent);
+            background: var(--bg-main);
+        }
+
+        /* 通话弹窗 - 极简半透明 */
+        .call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            display: none;
+        }
+
+        .call-modal.show {
+            display: flex;
+        }
+
+        .call-card {
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--padding-lg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--gap-lg);
+            min-width: 280px;
+        }
+
+        .call-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .call-buttons {
+            display: flex;
+            gap: var(--gap-md);
+        }
+
+        /* 工具类 */
+        .hidden {
+            display: none;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .gap-md {
+            gap: var(--gap-md);
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+
+            .config {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .media {
+                max-width: 180px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--gap-sm);
+            }
+
+            .chat {
+                padding: var(--padding-md);
+            }
+
+            .chat-input-area {
+                gap: var(--gap-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-title">
+                <i class="fas fa-comment-dots"></i> 极简端对端聊天
+            </div>
+            <div class="status" id="status">未连接</div>
+        </div>
+
+        <!-- 配置区 -->
+        <div class="config">
+            <div class="input-group">
+                <label class="label">你的标识</label>
+                <input type="text" class="input" id="myId" readonly placeholder="获取中...">
+            </div>
+            <div class="input-group">
+                <label class="label">对方标识</label>
+                <input type="text" class="input" id="targetId" placeholder="输入对方标识">
+            </div>
+            <div class="flex gap-md">
+                <button class="btn btn-primary" onclick="connect()">
+                    <i class="fas fa-link"></i> 连接
+                </button>
+                <button class="btn btn-success" id="callBtn" disabled onclick="startCall()">
+                    <i class="fas fa-phone"></i> 通话
+                </button>
+            </div>
+        </div>
+
+        <!-- 聊天区域 -->
+        <div class="chat">
+            <div class="chat-messages" id="chatMessages">
+                <!-- 消息动态生成 -->
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="chat-input-area">
+                <label for="fileInput" class="icon-btn">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <input type="file" id="fileInput" class="file-input" accept="image/*,video/*">
+                <textarea class="chat-input" id="msgInput" placeholder="输入消息（回车发送，Shift+回车换行）" onkeydown="if(event.keyCode===13 && !event.shiftKey){sendMsg();event.preventDefault();}"></textarea>
+                <button class="btn-icon btn-primary" onclick="sendMsg()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通话弹窗 -->
+    <div class="call-modal" id="callModal">
+        <div class="call-card">
+            <div class="call-title" id="callTitle">正在通话</div>
+            <div class="call-buttons">
+                <button class="btn btn-primary" onclick="endCall()">
+                    <i class="fas fa-phone-slash"></i> 挂断
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置项
+        const RTC_CONFIG = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                { urls: "stun:stun.cloudflare.com:3478" }
+            ],
+            media: { audio: true, video: false }
+        };
+
+        // 全局变量
+        let myId = '';
+        let peerConn = null;
+        let dataChannel = null;
+        let localStream = null;
+        let isCalling = false;
+        const STORAGE_KEY = 'p2p_chat_records';
+
+        // 页面加载初始化
+        window.onload = async () => {
+            await initId();
+            initFileInput();
+            loadChatRecords();
+            updateStatus('未连接', 'disconnected');
+        };
+
+        // 1. 生成/获取唯一标识
+        async function initId() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                myId = data.ip;
+            } catch (err) {
+                myId = `USER-${Math.random().toString(36).slice(2, 10).toUpperCase()}`;
+            }
+            document.getElementById('myId').value = myId;
+        }
+
+        // 2. 初始化文件上传
+        function initFileInput() {
+            document.getElementById('fileInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file || !isConnected()) {
+                    alert('请先建立连接再发送文件');
+                    e.target.value = '';
+                    return;
+                }
+                if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                    alert('仅支持图片/视频');
+                    e.target.value = '';
+                    return;
+                }
+                await sendMedia(file);
+                e.target.value = '';
+            });
+        }
+
+        // 3. 建立端对端连接
+        function connect() {
+            const targetId = document.getElementById('targetId').value.trim();
+            if (!targetId) {
+                alert('请输入对方标识');
+                return;
+            }
+
+            // 销毁旧连接
+            if (peerConn) peerConn.close();
+
+            // 初始化RTCPeerConnection
+            peerConn = new RTCPeerConnection(RTC_CONFIG.iceServers);
+            updateStatus(`正在连接 ${targetId}`, 'connecting');
+
+            // 初始化数据通道
+            createDataChannel();
+            // 初始化媒体通道
+            initMediaChannel();
+            // 监听连接状态
+            peerConn.onconnectionstatechange = onConnStateChange;
+            // 监听ICE候选
+            peerConn.onicecandidate = (e) => e.candidate && console.log('ICE候选：', e.candidate);
+
+            // 创建连接提议
+            peerConn.createOffer().then(offer => peerConn.setLocalDescription(offer))
+                .catch(err => {
+                    updateStatus('连接失败', 'disconnected');
+                    console.error(err);
+                });
+        }
+
+        // 4. 创建数据通道（文字/媒体）
+        function createDataChannel() {
+            dataChannel = peerConn.createDataChannel('chat', { ordered: true });
+            dataChannel.onmessage = (e) => handleMsg(JSON.parse(e.data));
+            dataChannel.onopen = () => updateStatus('已连接', 'connected');
+            dataChannel.onclose = () => updateStatus('连接断开', 'disconnected');
+            dataChannel.onerror = (err) => console.error('通道错误：', err);
+        }
+
+        // 5. 初始化媒体通道（语音）
+        function initMediaChannel() {
+            peerConn.ontrack = (e) => {
+                remoteStream = e.streams[0];
+                if (isCalling) document.getElementById('callTitle').textContent = '通话中';
+            };
+        }
+
+        // 6. 连接状态变化
+        function onConnStateChange() {
+            const state = peerConn.connectionState;
+            if (state === 'connected') {
+                document.getElementById('callBtn').disabled = false;
+            } else {
+                document.getElementById('callBtn').disabled = true;
+                if (isCalling) endCall();
+            }
+        }
+
+        // 7. 发送文字消息
+        function sendMsg() {
+            const input = document.getElementById('msgInput');
+            const content = input.value.trim();
+            if (!content || !isConnected()) return;
+
+            const msg = {
+                type: 'text',
+                content,
+                time: getTime()
+            };
+
+            dataChannel.send(JSON.stringify(msg));
+            addMsg(msg, 'self');
+            saveChatRecord(msg, 'self');
+            input.value = '';
+        }
+
+        // 8. 发送媒体文件
+        async function sendMedia(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const msg = {
+                    type: 'media',
+                    name: file.name,
+                    type: file.type,
+                    data: e.target.result,
+                    time: getTime()
+                };
+                dataChannel.send(JSON.stringify(msg));
+                addMsg(msg, 'self');
+                saveChatRecord(msg, 'self');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 9. 处理接收的消息
+        function handleMsg(msg) {
+            addMsg(msg, 'other');
+            saveChatRecord(msg, 'other');
+        }
+
+        // 10. 开始语音通话
+        async function startCall() {
+            if (!isConnected()) {
+                alert('请先建立连接');
+                return;
+            }
+
+            isCalling = true;
+            document.getElementById('callModal').classList.add('show');
+
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia(RTC_CONFIG.media);
+                localStream.getTracks().forEach(track => peerConn.addTrack(track, localStream));
+                const offer = await peerConn.createOffer();
+                await peerConn.setLocalDescription(offer);
+            } catch (err) {
+                alert('发起通话失败：' + err.message);
+                endCall();
+            }
+        }
+
+        // 11. 结束通话
+        function endCall() {
+            isCalling = false;
+            document.getElementById('callModal').classList.remove('show');
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+        }
+
+        // 12. 添加消息到页面
+        function addMsg(msg, type) {
+            const msgBox = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message message-${type}`;
+
+            // 生成消息内容
+            let content = '';
+            if (msg.type === 'text') {
+                content = `<div class="message-content">${msg.content}</div>`;
+            } else if (msg.type === 'media') {
+                if (msg.type.startsWith('image/')) {
+                    content = `<div class="media"><img src="${msg.data}" class="media-img" alt="${msg.name}"></div>`;
+                } else {
+                    content = `<div class="media"><video src="${msg.data}" class="media-video" controls></video></div>`;
+                }
+            }
+
+            // 拼接时间
+            msgDiv.innerHTML = `${content}<div class="message-meta">${msg.time}</div>`;
+            msgBox.appendChild(msgDiv);
+            // 滚动到底部
+            msgBox.scrollTop = msgBox.scrollHeight;
+        }
+
+        // 13. 状态更新
+        function updateStatus(text, cls) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = text;
+            statusEl.className = `status ${cls}`;
+        }
+
+        // 14. 工具方法：判断是否连接
+        function isConnected() {
+            return peerConn && peerConn.connectionState === 'connected' && dataChannel && dataChannel.readyState === 'open';
+        }
+
+        // 15. 工具方法：获取当前时间
+        function getTime() {
+            return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // 16. 聊天记录本地存储
+        function saveChatRecord(msg, type) {
+            const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            records.push({ ...msg, side: type });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        }
+
+        // 17. 加载本地聊天记录
+        function loadChatRecords() {
+            const records = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            records.forEach(record => addMsg(record, record.side));
+        }
+
+        // 可扩展：清除聊天记录
+        // function clearChatRecords() {
+        //     localStorage.removeItem(STORAGE_KEY);
+        //     document.getElementById('chatMessages').innerHTML = '';
+        // }
+    </script>
+</body>
+</html>
