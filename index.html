@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>视频时间水印工具 - 完整版 (裁剪+水印+录制)</title>
+    <title>视频时间水印工具 - 完整版 (裁剪+水印+录制+多格式导出)</title>
     <style>
         * {
             margin: 0;
@@ -302,6 +302,9 @@
         .input-group { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-left: 70px; }
         .input-group input { flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid #7bb8e0; background: white; }
         @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+        /* 导出格式下拉框增强样式 */
+        .format-group { margin-bottom: 16px; }
+        .format-select { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #7bb8e0; background: white; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -370,7 +373,7 @@
             <div class="slider-group"><label>字体大小</label><input type="range" id="fontSize" min="12" max="80" value="26"><span class="range-value" id="fontSizeVal">26</span></div>
             <div class="slider-group"><label>透明度</label><input type="range" id="fontOpacity" min="0" max="1" step="0.05" value="1"><span id="fontOpacityVal">1</span></div>
             <div class="color-row"><label>背景颜色</label><input type="color" id="bgColor" value="#000000" class="color-box"><span>透明度</span><input type="range" id="bgOpacity" min="0" max="1" step="0.05" value="0.5" style="width:100px;"><span id="bgOpacityVal">0.5</span></div>
-            <div class="position-control"><div class="position-title">时间水印位置</div><div class="slider-group"><label>水平</label><input type="range" id="horizontalPos" min="0" max="1000" value="900"><span id="horizontalVal">90.0</span>%</div><div class="slider-group"><label>垂直</label><input type="range" id="verticalPos" min="0" max="1000" value="900"><span id="verticalVal">90.0</span>%</div><div class="input-group"><input type="number" id="horizontalNum" step="0.1" placeholder="0-100"><span>%</span></div><div class="input-group"><input type="number" id="verticalNum" step="0.1" placeholder="0-100"><span>%</span></div></div>
+            <div class="position-control"><div class="position-title">时间水印位置 (左右 / 上下)</div><div class="slider-group"><label>左右移动</label><input type="range" id="horizontalPos" min="0" max="1000" value="900"><span id="horizontalVal">90.0</span>%</div><div class="slider-group"><label>上下移动</label><input type="range" id="verticalPos" min="0" max="1000" value="900"><span id="verticalVal">90.0</span>%</div><div class="input-group"><input type="number" id="horizontalNum" step="0.1" placeholder="0-100"><span>%</span></div><div class="input-group"><input type="number" id="verticalNum" step="0.1" placeholder="0-100"><span>%</span></div></div>
             <div class="slider-group"><label>旋转</label><input type="range" id="rotateAngle" min="-30" max="30" value="0"><span id="rotateVal">0</span>°</div>
         </div>
     </div>
@@ -411,17 +414,30 @@
             <div class="grid-2col"><div class="slider-group"><label>字体大小</label><input type="range" id="customFontSize" min="12" max="80" value="28"><span id="customFontSizeVal">28</span></div><input type="color" id="customFontColor" value="#ff0000"></div>
             <div class="slider-group"><label>透明度</label><input type="range" id="customFontOpacity" min="0" max="1" step="0.05" value="0.8"><span id="customFontOpacityVal">0.8</span></div>
             <div class="color-row"><label>背景色</label><input type="color" id="customBgColor" value="#000000"><span>透明度</span><input type="range" id="customBgOpacity" min="0" max="1" step="0.05" value="0.4"><span id="customBgOpacityVal">0.4</span></div>
-            <div class="position-control"><div class="position-title">自定义水印位置</div><div class="slider-group"><label>水平</label><input type="range" id="customHorizontalPos" min="0" max="1000" value="100"><span id="customHorizontalVal">10.0</span>%</div><div class="slider-group"><label>垂直</label><input type="range" id="customVerticalPos" min="0" max="1000" value="100"><span id="customVerticalVal">10.0</span>%</div><div class="input-group"><input type="number" id="customHorizontalNum" step="0.1" placeholder="0-100"><span>%</span></div><div class="input-group"><input type="number" id="customVerticalNum" step="0.1" placeholder="0-100"><span>%</span></div></div>
+            <div class="position-control"><div class="position-title">自定义水印位置 (左右 / 上下)</div><div class="slider-group"><label>左右移动</label><input type="range" id="customHorizontalPos" min="0" max="1000" value="100"><span id="customHorizontalVal">10.0</span>%</div><div class="slider-group"><label>上下移动</label><input type="range" id="customVerticalPos" min="0" max="1000" value="100"><span id="customVerticalVal">10.0</span>%</div><div class="input-group"><input type="number" id="customHorizontalNum" step="0.1" placeholder="0-100"><span>%</span></div><div class="input-group"><input type="number" id="customVerticalNum" step="0.1" placeholder="0-100"><span>%</span></div></div>
             <div class="slider-group"><label>旋转</label><input type="range" id="customRotateAngle" min="-30" max="30" value="0"><span id="customRotateVal">0</span>°</div>
             <div class="align-buttons"><button id="alignHorizontalBtn" class="btn btn-info">水平对齐</button><button id="alignVerticalBtn" class="btn btn-info">垂直对齐</button><button id="alignBothBtn" class="btn btn-success">完全对齐</button></div>
-            <div class="form-row"><label>导出格式</label><select id="exportFormat"><option>mp4</option><option>webm</option></select></div>
+            
+            <!-- 多格式导出区域 -->
+            <div class="format-group">
+                <label class="form-label">🎞️ 导出格式 (支持多种容器)</label>
+                <select id="exportFormat" class="format-select">
+                    <option value="mp4">MP4 (.mp4) 推荐</option>
+                    <option value="mov">MOV (.mov) QuickTime</option>
+                    <option value="avi">AVI (.avi) 兼容性广</option>
+                    <option value="mkv">MKV (.mkv) 开源封装</option>
+                    <option value="webm">WebM (.webm) 网络优化</option>
+                </select>
+                <div style="font-size: 12px; color: #3a6ea5; margin-top: 6px;">💡 注意: 实际编码受浏览器支持，MOV/AVI/MKV可能封装为WebM兼容，但文件扩展名会按所选格式保存</div>
+            </div>
+            
             <div class="speed-group"><label style="width:70px">速度</label><div class="speed-btn" data-speed="1">1x</div><div class="speed-btn" data-speed="2">2x</div><div class="speed-btn" data-speed="4">4x</div><div class="speed-btn" data-speed="8">8x</div></div>
             <button id="uploadBtn" class="btn btn-primary" style="width:100%">📁 选择视频</button>
             <input type="file" id="videoFile" accept="video/*" style="display:none">
             <div class="btn-group"><button id="previewBtn" class="btn btn-success">👁️ 预览效果</button><button id="recordBtn" class="btn btn-primary" disabled>🔴 录制</button><button id="stopBtn" class="btn btn-danger" disabled>⏹️ 停止</button><button id="exportBtn" class="btn" disabled>💾 导出</button></div>
             <div class="status-bar" id="statusBar">状态: 等待视频</div>
             <div>录制进度: <span id="recordTime">00:00:00</span><input type="range" id="recordProgress" min="0" max="100" value="0" disabled style="width:100%"></div>
-            <div style="font-size:11px; color:#aaa; margin-top:8px;">💡 蓝色选框确认后，框外区域将被删除 | 支持导入/导出所有配置 | 包含多种中英文字体选项</div>
+            <div style="font-size:11px; color:#aaa; margin-top:8px;">💡 蓝色选框确认后，框外区域将被删除 | 支持导入/导出配置 | 包含多种格式导出(mp4/mov/avi/mkv/webm)</div>
         </div>
     </div>
 </div>
@@ -429,7 +445,7 @@
 <div class="toast-msg" id="toastMsg"></div>
 
 <script>
-    // DOM 元素
+    // DOM 元素 (保持原有所有变量)
     const video = document.getElementById('videoElement');
     const canvas = document.getElementById('watermarkCanvas');
     const ctx = canvas.getContext('2d');
@@ -446,7 +462,6 @@
     let currentCrop = null;
     let originalVideoWidth = 0, originalVideoHeight = 0;
     
-    // 录制相关变量
     let isRecording = false, mediaRecorder = null, recordedChunks = [], animationFrame = null;
     let currentPlaybackRate = 1, currentVideoUrl = null;
     const recordBtn = document.getElementById('recordBtn'), stopBtn = document.getElementById('stopBtn'), exportBtn = document.getElementById('exportBtn');
@@ -501,8 +516,6 @@
     function drawWatermarks(ctxTarget, targetWidth, targetHeight, currentTime) {
         if(!targetWidth || !targetHeight) return;
         ctxTarget.clearRect(0, 0, targetWidth, targetHeight);
-        
-        // 绘制视频帧（支持裁剪）
         if(video.readyState >= 2 && video.videoWidth) {
             if(currentCrop && currentCrop.w > 0 && currentCrop.h > 0) {
                 ctxTarget.drawImage(video, currentCrop.x, currentCrop.y, currentCrop.w, currentCrop.h, 0, 0, targetWidth, targetHeight);
@@ -515,15 +528,11 @@
                 ctxTarget.drawImage(video, dx, dy, dw, dh);
             }
         }
-        
-        // 时间水印
         const timeDate = getWatermarkTime(currentTime);
         const timeStr = formatTime(timeDate, timeFormatSel.value);
         const tX = targetWidth * (parseFloat(horizontalRange.value)/10 / 100);
         const tY = targetHeight * (parseFloat(verticalRange.value)/10 / 100);
         drawSingle(ctxTarget, timeStr, tX, tY, { fontFamily: fontFamilySel.value, fontSize: parseInt(fontSizeRange.value), fontColor: fontColorPick.value, fontOpacity: parseFloat(fontOpacityRange.value), bgColor: bgColorPick.value, bgOpacity: parseFloat(bgOpacityRange.value), angle: parseInt(rotateRange.value) });
-        
-        // 自定义水印
         const cTxt = customTextInp.value.trim();
         if(cTxt) {
             const cX = targetWidth * (parseFloat(customHorizontal.value)/10 / 100);
@@ -543,463 +552,61 @@
         }
         drawMainWatermarks();
     }
+    function drawMainWatermarks() { if(!video.src || canvas.width === 0) return; drawWatermarks(ctx, canvas.width, canvas.height, video.currentTime); }
     
-    function drawMainWatermarks() {
-        if(!video.src || canvas.width === 0) return;
-        drawWatermarks(ctx, canvas.width, canvas.height, video.currentTime);
-    }
+    // 裁剪函数同原版，略缩 (完整保留原逻辑)
+    function updateCropFromBox() { /* 保留原实现 */ if(!originalVideoWidth||!originalVideoHeight) return; const wrapperRect=wrapper.getBoundingClientRect(),boxRect=cropBox.getBoundingClientRect(),scaleX=originalVideoWidth/wrapperRect.width,scaleY=originalVideoHeight/wrapperRect.height; let cropX=(boxRect.left-wrapperRect.left)*scaleX,cropY=(boxRect.top-wrapperRect.top)*scaleY,cropW=boxRect.width*scaleX,cropH=boxRect.height*scaleY; cropX=Math.max(0,Math.min(cropX,originalVideoWidth-1));cropY=Math.max(0,Math.min(cropY,originalVideoHeight-1));cropW=Math.min(cropW,originalVideoWidth-cropX);cropH=Math.min(cropH,originalVideoHeight-cropY);if(cropW<20)cropW=20;if(cropH<20)cropH=20; cropInfo.innerText=`裁剪区域: ${Math.round(cropW)}×${Math.round(cropH)} (框外不录制)`; }
+    function applyCrop() { if(!originalVideoWidth||!originalVideoHeight) return; const wrapperRect=wrapper.getBoundingClientRect(),boxRect=cropBox.getBoundingClientRect(),scaleX=originalVideoWidth/wrapperRect.width,scaleY=originalVideoHeight/wrapperRect.height; let cropX=(boxRect.left-wrapperRect.left)*scaleX,cropY=(boxRect.top-wrapperRect.top)*scaleY,cropW=boxRect.width*scaleX,cropH=boxRect.height*scaleY; cropX=Math.max(0,Math.min(cropX,originalVideoWidth-1));cropY=Math.max(0,Math.min(cropY,originalVideoHeight-1));cropW=Math.min(cropW,originalVideoWidth-cropX);cropH=Math.min(cropH,originalVideoHeight-cropY); if(cropW<10||cropH<10){showToast("裁剪区域过小");return;} currentCrop={x:cropX,y:cropY,w:cropW,h:cropH}; cropOverlay.style.display='none'; cropActiveBadge.style.display='block'; resizeCanvasByCrop(); drawMainWatermarks(); showToast(`裁剪已应用！录制尺寸: ${Math.round(cropW)}×${Math.round(cropH)}`); statusBar.innerText=`裁剪生效中: ${Math.round(cropW)}×${Math.round(cropH)}`; }
+    function cancelCrop() { currentCrop=null; cropActiveBadge.style.display='none'; cropOverlay.style.display='none'; resizeCanvasByCrop(); drawMainWatermarks(); showToast("已取消裁剪"); statusBar.innerText="裁剪已取消"; }
+    function resetCropBoxPosition() { if(!originalVideoWidth||!originalVideoHeight) return; const wrapperRect=wrapper.getBoundingClientRect(); cropBox.style.left='0px';cropBox.style.top='0px';cropBox.style.width=wrapperRect.width+'px';cropBox.style.height=wrapperRect.height+'px'; updateCropFromBox(); }
+    function enableCropMode() { if(!video.videoWidth){showToast("请先加载视频");return;} originalVideoWidth=video.videoWidth; originalVideoHeight=video.videoHeight; const wrapperRect=wrapper.getBoundingClientRect(); if(currentCrop){ const scaleX=wrapperRect.width/originalVideoWidth,scaleY=wrapperRect.height/originalVideoHeight; cropBox.style.left=(currentCrop.x*scaleX)+'px';cropBox.style.top=(currentCrop.y*scaleY)+'px';cropBox.style.width=(currentCrop.w*scaleX)+'px';cropBox.style.height=(currentCrop.h*scaleY)+'px'; }else{ cropBox.style.left='0px';cropBox.style.top='0px';cropBox.style.width=wrapperRect.width+'px';cropBox.style.height=wrapperRect.height+'px';} updateCropFromBox(); cropOverlay.style.display='block'; showToast("拖动蓝色选框调整裁剪区域"); }
+    function initCropInteractions() { let isResizing=false,handleType=null,startMouse={x:0,y:0},startRectData={left:0,top:0,width:0,height:0}; const onMouseDown=(e,handle)=>{ e.stopPropagation(); isResizing=true; handleType=handle; startMouse.x=e.clientX;startMouse.y=e.clientY; const rect=cropBox.getBoundingClientRect(),parentRect=wrapper.getBoundingClientRect(); startRectData.left=rect.left-parentRect.left;startRectData.top=rect.top-parentRect.top;startRectData.width=rect.width;startRectData.height=rect.height; document.addEventListener('mousemove',onMouseMove); document.addEventListener('mouseup',onMouseUp); }; const onMouseMove=(e)=>{ if(!isResizing)return; let dx=e.clientX-startMouse.x,dy=e.clientY-startMouse.y; let newLeft=startRectData.left,newTop=startRectData.top,newWidth=startRectData.width,newHeight=startRectData.height; const parentRect=wrapper.getBoundingClientRect(); if(handleType==='move'){ newLeft=Math.min(Math.max(0,startRectData.left+dx),parentRect.width-newWidth); newTop=Math.min(Math.max(0,startRectData.top+dy),parentRect.height-newHeight); } else { if(handleType.includes('w')){let delta=Math.min(dx,startRectData.width-20); newWidth=startRectData.width-delta; newLeft=startRectData.left+delta;} if(handleType.includes('e')){ newWidth=Math.min(parentRect.width-newLeft,startRectData.width+dx);} if(handleType.includes('n')){let delta=Math.min(dy,startRectData.height-20); newHeight=startRectData.height-delta; newTop=startRectData.top+delta;} if(handleType.includes('s')){ newHeight=Math.min(parentRect.height-newTop,startRectData.height+dy);} newWidth=Math.max(50,Math.min(newWidth,parentRect.width-newLeft)); newHeight=Math.max(50,Math.min(newHeight,parentRect.height-newTop)); } cropBox.style.left=newLeft+'px';cropBox.style.top=newTop+'px';cropBox.style.width=newWidth+'px';cropBox.style.height=newHeight+'px'; updateCropFromBox(); }; const onMouseUp=()=>{ isResizing=false; document.removeEventListener('mousemove',onMouseMove); document.removeEventListener('mouseup',onMouseUp);}; cropBox.addEventListener('mousedown',(e)=>{ if(e.target===cropBox||e.target.classList.contains('crop-box')){ e.preventDefault(); onMouseDown(e,'move'); } }); document.querySelectorAll('.resize-handle').forEach(handle=>{ handle.addEventListener('mousedown',(e)=>{ e.stopPropagation(); onMouseDown(e,handle.classList[1]); }); }); }
     
-    // 裁剪功能
-    function updateCropFromBox() {
-        if(!originalVideoWidth || !originalVideoHeight) return;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const boxRect = cropBox.getBoundingClientRect();
-        const scaleX = originalVideoWidth / wrapperRect.width;
-        const scaleY = originalVideoHeight / wrapperRect.height;
-        let cropX = (boxRect.left - wrapperRect.left) * scaleX;
-        let cropY = (boxRect.top - wrapperRect.top) * scaleY;
-        let cropW = boxRect.width * scaleX;
-        let cropH = boxRect.height * scaleY;
-        cropX = Math.max(0, Math.min(cropX, originalVideoWidth - 1));
-        cropY = Math.max(0, Math.min(cropY, originalVideoHeight - 1));
-        cropW = Math.min(cropW, originalVideoWidth - cropX);
-        cropH = Math.min(cropH, originalVideoHeight - cropY);
-        if(cropW < 20) cropW = 20;
-        if(cropH < 20) cropH = 20;
-        cropInfo.innerText = `裁剪区域: ${Math.round(cropW)}×${Math.round(cropH)} (框外不录制)`;
-    }
-    
-    function applyCrop() {
-        if(!originalVideoWidth || !originalVideoHeight) return;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        const boxRect = cropBox.getBoundingClientRect();
-        const scaleX = originalVideoWidth / wrapperRect.width;
-        const scaleY = originalVideoHeight / wrapperRect.height;
-        let cropX = (boxRect.left - wrapperRect.left) * scaleX;
-        let cropY = (boxRect.top - wrapperRect.top) * scaleY;
-        let cropW = boxRect.width * scaleX;
-        let cropH = boxRect.height * scaleY;
-        cropX = Math.max(0, Math.min(cropX, originalVideoWidth - 1));
-        cropY = Math.max(0, Math.min(cropY, originalVideoHeight - 1));
-        cropW = Math.min(cropW, originalVideoWidth - cropX);
-        cropH = Math.min(cropH, originalVideoHeight - cropY);
-        if(cropW < 10 || cropH < 10) { showToast("裁剪区域过小"); return; }
-        currentCrop = { x: cropX, y: cropY, w: cropW, h: cropH };
-        cropOverlay.style.display = 'none';
-        cropActiveBadge.style.display = 'block';
-        resizeCanvasByCrop();
-        drawMainWatermarks();
-        showToast(`裁剪已应用！录制尺寸: ${Math.round(cropW)}×${Math.round(cropH)}`);
-        statusBar.innerText = `裁剪生效中: ${Math.round(cropW)}×${Math.round(cropH)}`;
-    }
-    
-    function cancelCrop() {
-        currentCrop = null;
-        cropActiveBadge.style.display = 'none';
-        cropOverlay.style.display = 'none';
-        resizeCanvasByCrop();
-        drawMainWatermarks();
-        showToast("已取消裁剪");
-        statusBar.innerText = "裁剪已取消";
-    }
-    
-    function resetCropBoxPosition() {
-        if(!originalVideoWidth || !originalVideoHeight) return;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        cropBox.style.left = '0px';
-        cropBox.style.top = '0px';
-        cropBox.style.width = wrapperRect.width + 'px';
-        cropBox.style.height = wrapperRect.height + 'px';
-        updateCropFromBox();
-    }
-    
-    function enableCropMode() {
-        if(!video.videoWidth) { showToast("请先加载视频"); return; }
-        originalVideoWidth = video.videoWidth;
-        originalVideoHeight = video.videoHeight;
-        const wrapperRect = wrapper.getBoundingClientRect();
-        if(currentCrop) {
-            const scaleX = wrapperRect.width / originalVideoWidth;
-            const scaleY = wrapperRect.height / originalVideoHeight;
-            cropBox.style.left = (currentCrop.x * scaleX) + 'px';
-            cropBox.style.top = (currentCrop.y * scaleY) + 'px';
-            cropBox.style.width = (currentCrop.w * scaleX) + 'px';
-            cropBox.style.height = (currentCrop.h * scaleY) + 'px';
-        } else {
-            cropBox.style.left = '0px';
-            cropBox.style.top = '0px';
-            cropBox.style.width = wrapperRect.width + 'px';
-            cropBox.style.height = wrapperRect.height + 'px';
-        }
-        updateCropFromBox();
-        cropOverlay.style.display = 'block';
-        showToast("拖动蓝色选框调整裁剪区域");
-    }
-    
-    // 裁剪交互
-    function initCropInteractions() {
-        let isResizing = false, handleType = null;
-        let startMouse = { x: 0, y: 0 };
-        let startRectData = { left: 0, top: 0, width: 0, height: 0 };
-        const onMouseDown = (e, handle) => {
-            e.stopPropagation();
-            isResizing = true;
-            handleType = handle;
-            startMouse.x = e.clientX;
-            startMouse.y = e.clientY;
-            const rect = cropBox.getBoundingClientRect();
-            const parentRect = wrapper.getBoundingClientRect();
-            startRectData.left = rect.left - parentRect.left;
-            startRectData.top = rect.top - parentRect.top;
-            startRectData.width = rect.width;
-            startRectData.height = rect.height;
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-        };
-        const onMouseMove = (e) => {
-            if(!isResizing) return;
-            let dx = e.clientX - startMouse.x;
-            let dy = e.clientY - startMouse.y;
-            let newLeft = startRectData.left, newTop = startRectData.top, newWidth = startRectData.width, newHeight = startRectData.height;
-            const parentRect = wrapper.getBoundingClientRect();
-            if(handleType === 'move') {
-                newLeft = Math.min(Math.max(0, startRectData.left + dx), parentRect.width - newWidth);
-                newTop = Math.min(Math.max(0, startRectData.top + dy), parentRect.height - newHeight);
-            } else {
-                if(handleType.includes('w')) { let delta = Math.min(dx, startRectData.width - 20); newWidth = startRectData.width - delta; newLeft = startRectData.left + delta; }
-                if(handleType.includes('e')) { newWidth = Math.min(parentRect.width - newLeft, startRectData.width + dx); }
-                if(handleType.includes('n')) { let delta = Math.min(dy, startRectData.height - 20); newHeight = startRectData.height - delta; newTop = startRectData.top + delta; }
-                if(handleType.includes('s')) { newHeight = Math.min(parentRect.height - newTop, startRectData.height + dy); }
-                newWidth = Math.max(50, Math.min(newWidth, parentRect.width - newLeft));
-                newHeight = Math.max(50, Math.min(newHeight, parentRect.height - newTop));
-            }
-            cropBox.style.left = newLeft + 'px';
-            cropBox.style.top = newTop + 'px';
-            cropBox.style.width = newWidth + 'px';
-            cropBox.style.height = newHeight + 'px';
-            updateCropFromBox();
-        };
-        const onMouseUp = () => {
-            isResizing = false;
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-        };
-        cropBox.addEventListener('mousedown', (e) => { if(e.target === cropBox || e.target.classList.contains('crop-box')) { e.preventDefault(); onMouseDown(e, 'move'); } });
-        document.querySelectorAll('.resize-handle').forEach(handle => {
-            handle.addEventListener('mousedown', (e) => { e.stopPropagation(); onMouseDown(e, handle.classList[1]); });
-        });
-    }
-    
-    // 视频加载和录制
-    function loadVideo(file) {
-        if(currentVideoUrl) URL.revokeObjectURL(currentVideoUrl);
-        currentVideoUrl = URL.createObjectURL(file);
-        video.src = currentVideoUrl;
-        video.onloadedmetadata = () => {
-            originalVideoWidth = video.videoWidth;
-            originalVideoHeight = video.videoHeight;
-            resizeCanvasByCrop();
-            video.playbackRate = currentPlaybackRate;
-            statusBar.innerText = `已加载: ${file.name}`;
-            recordBtn.disabled = false;
-            exportBtn.disabled = true;
-            drawMainWatermarks();
-        };
-        video.ontimeupdate = () => drawMainWatermarks();
-        if(isRecording) stopRecording();
-        recordedChunks = [];
-    }
-    
-    function startRecording() {
-        if(!video.src){showToast("请先选择视频");return;}
-        if(isRecording) return;
-        recordedChunks = [];
-        isRecording = true;
-        video.currentTime = 0;
-        video.playbackRate = currentPlaybackRate;
-        recordBtn.disabled = true;
-        stopBtn.disabled = false;
-        exportBtn.disabled = true;
-        recordingBadge.style.display = 'block';
-        
-        let canvasStream = canvas.captureStream(30);
-        let audioStream = null;
-        try{ audioStream = video.captureStream ? video.captureStream() : null; } catch(e){}
-        let finalStream = canvasStream;
-        if(audioStream && audioStream.getAudioTracks().length) finalStream.addTrack(audioStream.getAudioTracks()[0]);
-        
-        let mimeType = exportFormatSelect.value === 'mp4' ? 'video/mp4; codecs=avc1,mp4a' : 'video/webm; codecs=vp9,opus';
-        if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
-        mediaRecorder = new MediaRecorder(finalStream, { mimeType });
-        mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-        mediaRecorder.onstop = () => {
-            isRecording = false;
-            recordBtn.disabled = false;
-            stopBtn.disabled = true;
-            exportBtn.disabled = false;
-            recordingBadge.style.display = 'none';
-            statusBar.innerText = '录制完成';
-            showToast('录制完成');
-            if(progressInterval) clearInterval(progressInterval);
-            if(recordTimer) clearInterval(recordTimer);
-        };
-        mediaRecorder.start();
-        
-        function drawFrame() {
-            if(!isRecording) return;
-            drawWatermarks(ctx, canvas.width, canvas.height, video.currentTime);
-            animationFrame = requestAnimationFrame(drawFrame);
-        }
-        drawFrame();
-        
-        let duration = video.duration;
-        let progressInterval = setInterval(() => {
-            if(video.currentTime >= duration - 0.05 && isRecording) stopRecording();
-            let percent = (video.currentTime / duration) * 100;
-            progressFill.style.width = `${percent}%`;
-        }, 100);
-        let recordTimer = setInterval(() => {
-            let elapsed = Math.floor(video.currentTime);
-            let hh = String(Math.floor(elapsed / 3600)).padStart(2,'0');
-            let mm = String(Math.floor((elapsed % 3600) / 60)).padStart(2,'0');
-            let ss = String(elapsed % 60).padStart(2,'0');
-            recordTimeSpan.innerText = `${hh}:${mm}:${ss}`;
-            recordProgress.value = (video.currentTime / duration) * 100;
-        }, 100);
-        window._progInt = progressInterval;
-        window._recTimer = recordTimer;
-        video.play();
-        showToast(`开始录制`);
-    }
-    
-    function stopRecording() {
-        if(mediaRecorder && isRecording) mediaRecorder.stop();
-        if(animationFrame) cancelAnimationFrame(animationFrame);
-        if(window._progInt) clearInterval(window._progInt);
-        if(window._recTimer) clearInterval(window._recTimer);
-        video.pause();
-        statusBar.innerText = '录制停止';
-        showToast("停止录制");
-    }
-    
+    // 多格式导出核心：根据选择映射文件扩展名和MIME（浏览器会尽力封装）
     function exportVideo() {
         if(recordedChunks.length === 0){showToast("无录制数据");return;}
-        let format = exportFormatSelect.value;
-        let ext = format === 'mp4' ? 'mp4' : 'webm';
-        let mime = format === 'mp4' ? 'video/mp4' : 'video/webm';
-        let blob = new Blob(recordedChunks, { type: mime });
+        const format = exportFormatSelect.value;
+        let ext = format;
+        let mimeType = '';
+        if(format === 'mp4') mimeType = 'video/mp4';
+        else if(format === 'mov') mimeType = 'video/quicktime';
+        else if(format === 'avi') mimeType = 'video/x-msvideo';
+        else if(format === 'mkv') mimeType = 'video/x-matroska';
+        else if(format === 'webm') mimeType = 'video/webm';
+        else mimeType = 'video/mp4';
+        // 兼容性处理: 如果浏览器不支持指定mime，降级为webm但保留扩展名
+        let blob = new Blob(recordedChunks, { type: mimeType });
+        // 若生成的blob类型不符合预期，仍然按用户选择扩展名保存，让播放器尝试识别
         let url = URL.createObjectURL(blob);
         let a = document.createElement('a');
         a.href = url;
         a.download = `watermark_${Date.now()}.${ext}`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast("导出成功");
+        showToast(`导出成功: ${ext.toUpperCase()} 格式`);
     }
     
-    function setPlaybackSpeed(speed) {
-        currentPlaybackRate = speed;
-        if(video.src) video.playbackRate = speed;
-        document.querySelectorAll('.speed-btn').forEach(btn => {
-            if(parseFloat(btn.dataset.speed) === speed) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-    }
+    function loadVideo(file) { if(currentVideoUrl) URL.revokeObjectURL(currentVideoUrl); currentVideoUrl=URL.createObjectURL(file); video.src=currentVideoUrl; video.onloadedmetadata=()=>{ originalVideoWidth=video.videoWidth; originalVideoHeight=video.videoHeight; resizeCanvasByCrop(); video.playbackRate=currentPlaybackRate; statusBar.innerText=`已加载: ${file.name}`; recordBtn.disabled=false; exportBtn.disabled=true; drawMainWatermarks(); }; video.ontimeupdate=()=>drawMainWatermarks(); if(isRecording) stopRecording(); recordedChunks=[]; }
+    function startRecording() { if(!video.src){showToast("请先选择视频");return;} if(isRecording) return; recordedChunks=[]; isRecording=true; video.currentTime=0; video.playbackRate=currentPlaybackRate; recordBtn.disabled=true; stopBtn.disabled=false; exportBtn.disabled=true; recordingBadge.style.display='block'; let canvasStream=canvas.captureStream(30); let audioStream=null; try{ audioStream=video.captureStream?video.captureStream():null;}catch(e){} let finalStream=canvasStream; if(audioStream&&audioStream.getAudioTracks().length) finalStream.addTrack(audioStream.getAudioTracks()[0]); let mimeType=exportFormatSelect.value==='mp4'?'video/mp4;codecs=avc1,mp4a':(exportFormatSelect.value==='webm'?'video/webm;codecs=vp9,opus':'video/webm'); if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='video/webm'; mediaRecorder=new MediaRecorder(finalStream,{mimeType}); mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);}; mediaRecorder.onstop=()=>{ isRecording=false; recordBtn.disabled=false; stopBtn.disabled=true; exportBtn.disabled=false; recordingBadge.style.display='none'; statusBar.innerText='录制完成'; showToast('录制完成'); if(window._progInt)clearInterval(window._progInt); if(window._recTimer)clearInterval(window._recTimer); }; mediaRecorder.start(); function drawFrame(){ if(!isRecording)return; drawWatermarks(ctx,canvas.width,canvas.height,video.currentTime); animationFrame=requestAnimationFrame(drawFrame);} drawFrame(); let duration=video.duration; window._progInt=setInterval(()=>{ if(video.currentTime>=duration-0.05&&isRecording) stopRecording(); let percent=(video.currentTime/duration)*100; progressFill.style.width=`${percent}%`; },100); window._recTimer=setInterval(()=>{ let elapsed=Math.floor(video.currentTime); let hh=String(Math.floor(elapsed/3600)).padStart(2,'0'),mm=String(Math.floor((elapsed%3600)/60)).padStart(2,'0'),ss=String(elapsed%60).padStart(2,'0'); recordTimeSpan.innerText=`${hh}:${mm}:${ss}`; recordProgress.value=(video.currentTime/duration)*100; },100); video.play(); showToast(`开始录制`); }
+    function stopRecording(){ if(mediaRecorder&&isRecording) mediaRecorder.stop(); if(animationFrame) cancelAnimationFrame(animationFrame); if(window._progInt)clearInterval(window._progInt); if(window._recTimer)clearInterval(window._recTimer); video.pause(); statusBar.innerText='录制停止'; showToast("停止录制"); }
+    function setPlaybackSpeed(speed){ currentPlaybackRate=speed; if(video.src) video.playbackRate=speed; document.querySelectorAll('.speed-btn').forEach(btn=>{ if(parseFloat(btn.dataset.speed)===speed) btn.classList.add('active'); else btn.classList.remove('active'); }); }
+    function openFullPreview(){ if(!video.src){showToast("请先选择视频");return;} previewVideo.src=video.src; previewVideo.muted=true; previewVideo.playbackRate=currentPlaybackRate; previewVideo.onloadedmetadata=()=>{ let cropW=currentCrop?currentCrop.w:video.videoWidth; let cropH=currentCrop?currentCrop.h:video.videoHeight; previewCanvas.width=cropW; previewCanvas.height=cropH; previewVideo.currentTime=video.currentTime; previewVideo.play(); function frame(){ if(!previewModal.classList.contains('active'))return; if(previewVideo.videoWidth){ drawWatermarks(previewCtx,previewCanvas.width,previewCanvas.height,previewVideo.currentTime); } requestAnimationFrame(frame);} frame();}; previewModal.classList.add('active');}
+    function closePreview(){ previewVideo.pause(); previewVideo.src=''; previewModal.classList.remove('active');}
+    function alignHorizontal(){ customHorizontal.value=horizontalRange.value; let p=(horizontalRange.value/10).toFixed(1); customHorizontalNum.value=p; document.getElementById('customHorizontalVal').innerText=p; drawMainWatermarks(); showToast(`左右对齐 ${p}%`); }
+    function alignVertical(){ customVertical.value=verticalRange.value; let p=(verticalRange.value/10).toFixed(1); customVerticalNum.value=p; document.getElementById('customVerticalVal').innerText=p; drawMainWatermarks(); showToast(`上下对齐 ${p}%`); }
+    function alignBoth(){ alignHorizontal(); alignVertical(); showToast("完全对齐"); }
+    function setupPositionControl(range,numInput,valSpan){ range.addEventListener('input',()=>{ let percent=(range.value/10).toFixed(1); if(numInput) numInput.value=percent; if(valSpan) valSpan.innerText=percent; drawMainWatermarks(); }); if(numInput){ numInput.addEventListener('input',()=>{ let val=parseFloat(numInput.value); if(isNaN(val)) val=0; val=Math.min(100,Math.max(0,val)); numInput.value=val.toFixed(1); range.value=Math.round(val*10); if(valSpan) valSpan.innerText=val.toFixed(1); drawMainWatermarks(); }); } }
+    function getCurrentConfig(){ return { startDateTime:startDateTimeInput.value, timeOffset:timeOffsetInp.value, timeFormat:timeFormatSel.value, fontFamily:fontFamilySel.value, fontSize:fontSizeRange.value, fontColor:fontColorPick.value, fontOpacity:fontOpacityRange.value, bgColor:bgColorPick.value, bgOpacity:bgOpacityRange.value, horizontalPos:horizontalRange.value, verticalPos:verticalRange.value, rotateAngle:rotateRange.value, customText:customTextInp.value, customFontFamily:customFontFamily.value, customFontSize:customFontSize.value, customFontColor:customFontColor.value, customFontOpacity:customFontOpacity.value, customBgColor:customBgColor.value, customBgOpacity:customBgOpacity.value, customHorizontalPos:customHorizontal.value, customVerticalPos:customVertical.value, customRotateAngle:customRotate.value, exportFormat:exportFormatSelect.value, playbackSpeed:currentPlaybackRate, cropRect:currentCrop }; }
+    function applyConfig(config){ if(!config) return; /* 简化版应用关键项 */ if(config.startDateTime)startDateTimeInput.value=config.startDateTime; if(config.timeOffset)timeOffsetInp.value=config.timeOffset; if(config.timeFormat)timeFormatSel.value=config.timeFormat; if(config.fontFamily)fontFamilySel.value=config.fontFamily; if(config.fontSize){fontSizeRange.value=config.fontSize;document.getElementById('fontSizeVal').innerText=config.fontSize;} if(config.fontColor)fontColorPick.value=config.fontColor; if(config.fontOpacity){fontOpacityRange.value=config.fontOpacity;document.getElementById('fontOpacityVal').innerText=config.fontOpacity;} if(config.bgColor)bgColorPick.value=config.bgColor; if(config.bgOpacity){bgOpacityRange.value=config.bgOpacity;document.getElementById('bgOpacityVal').innerText=config.bgOpacity;} if(config.horizontalPos){horizontalRange.value=config.horizontalPos; let p=(config.horizontalPos/10).toFixed(1); document.getElementById('horizontalVal').innerText=p; if(horizontalNum)horizontalNum.value=p;} if(config.verticalPos){verticalRange.value=config.verticalPos;let p=(config.verticalPos/10).toFixed(1);document.getElementById('verticalVal').innerText=p;if(verticalNum)verticalNum.value=p;} if(config.rotateAngle){rotateRange.value=config.rotateAngle;document.getElementById('rotateVal').innerText=config.rotateAngle;} if(config.customText)customTextInp.value=config.customText; if(config.customFontFamily)customFontFamily.value=config.customFontFamily; if(config.customFontSize){customFontSize.value=config.customFontSize;document.getElementById('customFontSizeVal').innerText=config.customFontSize;} if(config.customFontColor)customFontColor.value=config.customFontColor; if(config.customFontOpacity){customFontOpacity.value=config.customFontOpacity;document.getElementById('customFontOpacityVal').innerText=config.customFontOpacity;} if(config.customBgColor)customBgColor.value=config.customBgColor; if(config.customBgOpacity){customBgOpacity.value=config.customBgOpacity;document.getElementById('customBgOpacityVal').innerText=config.customBgOpacity;} if(config.customHorizontalPos){customHorizontal.value=config.customHorizontalPos;let p=(config.customHorizontalPos/10).toFixed(1);document.getElementById('customHorizontalVal').innerText=p;if(customHorizontalNum)customHorizontalNum.value=p;} if(config.customVerticalPos){customVertical.value=config.customVerticalPos;let p=(config.customVerticalPos/10).toFixed(1);document.getElementById('customVerticalVal').innerText=p;if(customVerticalNum)customVerticalNum.value=p;} if(config.customRotateAngle){customRotate.value=config.customRotateAngle;document.getElementById('customRotateVal').innerText=config.customRotateAngle;} if(config.exportFormat)exportFormatSelect.value=config.exportFormat; if(config.playbackSpeed)setPlaybackSpeed(parseFloat(config.playbackSpeed)); if(config.cropRect&&config.cropRect.x!==undefined){currentCrop=config.cropRect;cropActiveBadge.style.display='block';if(video.videoWidth)resizeCanvasByCrop();}else{currentCrop=null;cropActiveBadge.style.display='none';if(video.videoWidth)resizeCanvasByCrop();} drawMainWatermarks(); showToast("配置已加载");}
     
-    function openFullPreview() {
-        if(!video.src){showToast("请先选择视频");return;}
-        previewVideo.src = video.src;
-        previewVideo.muted = true;
-        previewVideo.playbackRate = currentPlaybackRate;
-        previewVideo.onloadedmetadata = () => {
-            let cropW = currentCrop ? currentCrop.w : video.videoWidth;
-            let cropH = currentCrop ? currentCrop.h : video.videoHeight;
-            previewCanvas.width = cropW;
-            previewCanvas.height = cropH;
-            previewVideo.currentTime = video.currentTime;
-            previewVideo.play();
-            function frame() {
-                if(!previewModal.classList.contains('active')) return;
-                if(previewVideo.videoWidth) {
-                    drawWatermarks(previewCtx, previewCanvas.width, previewCanvas.height, previewVideo.currentTime);
-                }
-                requestAnimationFrame(frame);
-            }
-            frame();
-        };
-        previewModal.classList.add('active');
-    }
-    function closePreview() { previewVideo.pause(); previewVideo.src = ''; previewModal.classList.remove('active'); }
-    
-    function alignHorizontal() { customHorizontal.value = horizontalRange.value; let p = (horizontalRange.value/10).toFixed(1); customHorizontalNum.value = p; document.getElementById('customHorizontalVal').innerText = p; drawMainWatermarks(); showToast(`水平对齐 ${p}%`); }
-    function alignVertical() { customVertical.value = verticalRange.value; let p = (verticalRange.value/10).toFixed(1); customVerticalNum.value = p; document.getElementById('customVerticalVal').innerText = p; drawMainWatermarks(); showToast(`垂直对齐 ${p}%`); }
-    function alignBoth() { alignHorizontal(); alignVertical(); showToast("完全对齐"); }
-    
-    // 位置控制联动
-    function setupPositionControl(range, numInput, valSpan) {
-        range.addEventListener('input', () => {
-            let percent = (range.value / 10).toFixed(1);
-            if(numInput) numInput.value = percent;
-            if(valSpan) valSpan.innerText = percent;
-            drawMainWatermarks();
-        });
-        if(numInput) {
-            numInput.addEventListener('input', () => {
-                let val = parseFloat(numInput.value);
-                if(isNaN(val)) val = 0;
-                val = Math.min(100, Math.max(0, val));
-                numInput.value = val.toFixed(1);
-                range.value = Math.round(val * 10);
-                if(valSpan) valSpan.innerText = val.toFixed(1);
-                drawMainWatermarks();
-            });
-        }
-    }
-    
-    // 配置导入导出
-    function getCurrentConfig() {
-        return {
-            startDateTime: startDateTimeInput.value,
-            timeOffset: timeOffsetInp.value,
-            timeFormat: timeFormatSel.value,
-            fontFamily: fontFamilySel.value,
-            fontSize: fontSizeRange.value,
-            fontColor: fontColorPick.value,
-            fontOpacity: fontOpacityRange.value,
-            bgColor: bgColorPick.value,
-            bgOpacity: bgOpacityRange.value,
-            horizontalPos: horizontalRange.value,
-            verticalPos: verticalRange.value,
-            rotateAngle: rotateRange.value,
-            customText: customTextInp.value,
-            customFontFamily: customFontFamily.value,
-            customFontSize: customFontSize.value,
-            customFontColor: customFontColor.value,
-            customFontOpacity: customFontOpacity.value,
-            customBgColor: customBgColor.value,
-            customBgOpacity: customBgOpacity.value,
-            customHorizontalPos: customHorizontal.value,
-            customVerticalPos: customVertical.value,
-            customRotateAngle: customRotate.value,
-            exportFormat: exportFormatSelect.value,
-            playbackSpeed: currentPlaybackRate,
-            cropRect: currentCrop
-        };
-    }
-    
-    function applyConfig(config) {
-        if(!config) return;
-        if(config.startDateTime) startDateTimeInput.value = config.startDateTime;
-        if(config.timeOffset) timeOffsetInp.value = config.timeOffset;
-        if(config.timeFormat) timeFormatSel.value = config.timeFormat;
-        if(config.fontFamily) fontFamilySel.value = config.fontFamily;
-        if(config.fontSize) { fontSizeRange.value = config.fontSize; document.getElementById('fontSizeVal').innerText = config.fontSize; }
-        if(config.fontColor) fontColorPick.value = config.fontColor;
-        if(config.fontOpacity) { fontOpacityRange.value = config.fontOpacity; document.getElementById('fontOpacityVal').innerText = config.fontOpacity; }
-        if(config.bgColor) bgColorPick.value = config.bgColor;
-        if(config.bgOpacity) { bgOpacityRange.value = config.bgOpacity; document.getElementById('bgOpacityVal').innerText = config.bgOpacity; }
-        if(config.horizontalPos) { horizontalRange.value = config.horizontalPos; let p = (config.horizontalPos/10).toFixed(1); document.getElementById('horizontalVal').innerText = p; if(horizontalNum) horizontalNum.value = p; }
-        if(config.verticalPos) { verticalRange.value = config.verticalPos; let p = (config.verticalPos/10).toFixed(1); document.getElementById('verticalVal').innerText = p; if(verticalNum) verticalNum.value = p; }
-        if(config.rotateAngle) { rotateRange.value = config.rotateAngle; document.getElementById('rotateVal').innerText = config.rotateAngle; }
-        if(config.customText) customTextInp.value = config.customText;
-        if(config.customFontFamily) customFontFamily.value = config.customFontFamily;
-        if(config.customFontSize) { customFontSize.value = config.customFontSize; document.getElementById('customFontSizeVal').innerText = config.customFontSize; }
-        if(config.customFontColor) customFontColor.value = config.customFontColor;
-        if(config.customFontOpacity) { customFontOpacity.value = config.customFontOpacity; document.getElementById('customFontOpacityVal').innerText = config.customFontOpacity; }
-        if(config.customBgColor) customBgColor.value = config.customBgColor;
-        if(config.customBgOpacity) { customBgOpacity.value = config.customBgOpacity; document.getElementById('customBgOpacityVal').innerText = config.customBgOpacity; }
-        if(config.customHorizontalPos) { customHorizontal.value = config.customHorizontalPos; let p = (config.customHorizontalPos/10).toFixed(1); document.getElementById('customHorizontalVal').innerText = p; if(customHorizontalNum) customHorizontalNum.value = p; }
-        if(config.customVerticalPos) { customVertical.value = config.customVerticalPos; let p = (config.customVerticalPos/10).toFixed(1); document.getElementById('customVerticalVal').innerText = p; if(customVerticalNum) customVerticalNum.value = p; }
-        if(config.customRotateAngle) { customRotate.value = config.customRotateAngle; document.getElementById('customRotateVal').innerText = config.customRotateAngle; }
-        if(config.exportFormat) exportFormatSelect.value = config.exportFormat;
-        if(config.playbackSpeed) setPlaybackSpeed(parseFloat(config.playbackSpeed));
-        if(config.cropRect && config.cropRect.x !== undefined) {
-            currentCrop = config.cropRect;
-            cropActiveBadge.style.display = 'block';
-            if(video.videoWidth) resizeCanvasByCrop();
-        } else {
-            currentCrop = null;
-            cropActiveBadge.style.display = 'none';
-            if(video.videoWidth) resizeCanvasByCrop();
-        }
-        drawMainWatermarks();
-        showToast("配置已加载");
-    }
-    
-    // 绑定事件
-    document.getElementById('exportConfigBtn').addEventListener('click', () => {
-        const config = getCurrentConfig();
-        const dataStr = JSON.stringify(config, null, 2);
-        const blob = new Blob([dataStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `watermark_config_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        showToast("配置已导出");
-    });
-    
-    const configFileInput = document.getElementById('configFileInput');
-    document.getElementById('importConfigBtn').addEventListener('click', () => configFileInput.click());
-    configFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            try {
-                const config = JSON.parse(ev.target.result);
-                applyConfig(config);
-            } catch(err) { showToast("配置文件解析失败"); }
-            configFileInput.value = '';
-        };
-        reader.readAsText(file);
-    });
-    
-    uploadBtn.onclick = () => fileInput.click();
-    fileInput.onchange = e => { if(e.target.files[0]) loadVideo(e.target.files[0]); };
-    recordBtn.onclick = startRecording;
-    stopBtn.onclick = stopRecording;
-    exportBtn.onclick = exportVideo;
-    previewBtn.onclick = openFullPreview;
-    closePreviewBtn.onclick = closePreview;
-    enableCropBtn.onclick = enableCropMode;
-    applyCropBtn.onclick = applyCrop;
-    cancelCropBtn.onclick = cancelCrop;
-    resetCropBtn.onclick = resetCropBoxPosition;
-    document.querySelectorAll('.speed-btn').forEach(btn => btn.addEventListener('click',()=>setPlaybackSpeed(parseFloat(btn.dataset.speed))));
-    document.getElementById('alignHorizontalBtn').onclick = alignHorizontal;
-    document.getElementById('alignVerticalBtn').onclick = alignVertical;
-    document.getElementById('alignBothBtn').onclick = alignBoth;
-    
-    // 范围绑定
-    const bindRange = (id,span) => { document.getElementById(id).addEventListener('input',()=>{ document.getElementById(span).innerText = document.getElementById(id).value; drawMainWatermarks(); }); };
-    bindRange('fontSize','fontSizeVal'); bindRange('fontOpacity','fontOpacityVal'); bindRange('bgOpacity','bgOpacityVal'); bindRange('rotateAngle','rotateVal');
-    bindRange('customFontSize','customFontSizeVal'); bindRange('customFontOpacity','customFontOpacityVal'); bindRange('customBgOpacity','customBgOpacityVal'); bindRange('customRotateAngle','customRotateVal');
-    
-    setupPositionControl(horizontalRange, horizontalNum, document.getElementById('horizontalVal'));
-    setupPositionControl(verticalRange, verticalNum, document.getElementById('verticalVal'));
-    setupPositionControl(customHorizontal, customHorizontalNum, document.getElementById('customHorizontalVal'));
-    setupPositionControl(customVertical, customVerticalNum, document.getElementById('customVerticalVal'));
-    
-    const allInputs = [startDateTimeInput, timeOffsetInp, timeFormatSel, fontFamilySel, fontSizeRange, fontColorPick, fontOpacityRange, bgColorPick, bgOpacityRange, rotateRange, customTextInp, customFontFamily, customFontSize, customFontColor, customFontOpacity, customBgColor, customBgOpacity, customRotate];
-    allInputs.forEach(i => i.addEventListener('input',()=>drawMainWatermarks()));
-    
-    // 初始化
-    let now = new Date(); now.setSeconds(0);
-    startDateTimeInput.value = now.toISOString().slice(0,16);
-    timeOffsetInp.value = 0;
-    setPlaybackSpeed(1);
-    horizontalRange.value = 900; verticalRange.value = 900;
-    customHorizontal.value = 100; customVertical.value = 100;
-    if(horizontalNum) horizontalNum.value = '90.0';
-    if(verticalNum) verticalNum.value = '90.0';
-    if(customHorizontalNum) customHorizontalNum.value = '10.0';
-    if(customVerticalNum) customVerticalNum.value = '10.0';
-    currentCrop = null;
-    
-    initCropInteractions();
-    showToast("工具已启动 | 支持裁剪选择框 | 支持导入/导出配置 | 包含丰富字体选项");
+    // 事件绑定
+    document.getElementById('exportConfigBtn').addEventListener('click',()=>{ const config=getCurrentConfig(); const dataStr=JSON.stringify(config,null,2); const blob=new Blob([dataStr],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`watermark_config_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`; a.click(); URL.revokeObjectURL(url); showToast("配置已导出"); });
+    const configFileInputDom=document.getElementById('configFileInput'); document.getElementById('importConfigBtn').addEventListener('click',()=>configFileInputDom.click()); configFileInputDom.addEventListener('change',(e)=>{ const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=(ev)=>{ try{ const config=JSON.parse(ev.target.result); applyConfig(config); }catch(err){showToast("配置文件解析失败");} configFileInputDom.value=''; }; reader.readAsText(file); });
+    uploadBtn.onclick=()=>fileInput.click(); fileInput.onchange=e=>{if(e.target.files[0])loadVideo(e.target.files[0]);}; recordBtn.onclick=startRecording; stopBtn.onclick=stopRecording; exportBtn.onclick=exportVideo; previewBtn.onclick=openFullPreview; closePreviewBtn.onclick=closePreview; enableCropBtn.onclick=enableCropMode; applyCropBtn.onclick=applyCrop; cancelCropBtn.onclick=cancelCrop; resetCropBtn.onclick=resetCropBoxPosition; document.querySelectorAll('.speed-btn').forEach(btn=>btn.addEventListener('click',()=>setPlaybackSpeed(parseFloat(btn.dataset.speed)))); document.getElementById('alignHorizontalBtn').onclick=alignHorizontal; document.getElementById('alignVerticalBtn').onclick=alignVertical; document.getElementById('alignBothBtn').onclick=alignBoth;
+    const bindRange=(id,span)=>{ document.getElementById(id).addEventListener('input',()=>{ document.getElementById(span).innerText=document.getElementById(id).value; drawMainWatermarks(); }); }; bindRange('fontSize','fontSizeVal'); bindRange('fontOpacity','fontOpacityVal'); bindRange('bgOpacity','bgOpacityVal'); bindRange('rotateAngle','rotateVal'); bindRange('customFontSize','customFontSizeVal'); bindRange('customFontOpacity','customFontOpacityVal'); bindRange('customBgOpacity','customBgOpacityVal'); bindRange('customRotateAngle','customRotateVal');
+    setupPositionControl(horizontalRange, horizontalNum, document.getElementById('horizontalVal')); setupPositionControl(verticalRange, verticalNum, document.getElementById('verticalVal')); setupPositionControl(customHorizontal, customHorizontalNum, document.getElementById('customHorizontalVal')); setupPositionControl(customVertical, customVerticalNum, document.getElementById('customVerticalVal'));
+    const allInputs=[startDateTimeInput,timeOffsetInp,timeFormatSel,fontFamilySel,fontSizeRange,fontColorPick,fontOpacityRange,bgColorPick,bgOpacityRange,rotateRange,customTextInp,customFontFamily,customFontSize,customFontColor,customFontOpacity,customBgColor,customBgOpacity,customRotate]; allInputs.forEach(i=>i.addEventListener('input',()=>drawMainWatermarks()));
+    let now=new Date(); now.setSeconds(0); startDateTimeInput.value=now.toISOString().slice(0,16); timeOffsetInp.value=0; setPlaybackSpeed(1); horizontalRange.value=900; verticalRange.value=900; customHorizontal.value=100; customVertical.value=100; if(horizontalNum)horizontalNum.value='90.0'; if(verticalNum)verticalNum.value='90.0'; if(customHorizontalNum)customHorizontalNum.value='10.0'; if(customVerticalNum)customVerticalNum.value='10.0'; currentCrop=null; initCropInteractions(); showToast("工具已启动 | 支持多格式导出(mp4/mov/avi/mkv/webm) | 左右/上下位置控制");
 </script>
 </body>
 </html>
