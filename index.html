@@ -504,12 +504,12 @@
 
                 <div class="row-2col">
                     <div class="form-group">
-                        <label>⬅️ 左右位置</label>
+                        <label>水平位置</label>
                         <input type="range" id="timePosX" min="0" max="100" step="1" value="20">
                         <span id="timePosXValue" class="range-value">20%</span>
                     </div>
                     <div class="form-group">
-                        <label>⬆️ 上下位置</label>
+                        <label>垂直位置</label>
                         <input type="range" id="timePosY" min="0" max="100" step="1" value="20">
                         <span id="timePosYValue" class="range-value">20%</span>
                     </div>
@@ -589,12 +589,12 @@
 
                 <div class="row-2col">
                     <div class="form-group">
-                        <label>⬅️ 左右位置</label>
+                        <label>水平位置</label>
                         <input type="range" id="textPosX" min="0" max="100" step="1" value="80">
                         <span id="textPosXValue" class="range-value">80%</span>
                     </div>
                     <div class="form-group">
-                        <label>⬆️ 上下位置</label>
+                        <label>垂直位置</label>
                         <input type="range" id="textPosY" min="0" max="100" step="1" value="80">
                         <span id="textPosYValue" class="range-value">80%</span>
                     </div>
@@ -901,7 +901,7 @@
             
             mediaRecorder = new MediaRecorder(finalStream, {
                 mimeType: mimeType,
-                videoBitsPerSecond: 8000000,
+                videoBitsPerSecond: 8000000,  // 8 Mbps，提高画质
                 audioBitsPerSecond: 128000
             });
             
@@ -912,12 +912,14 @@
             };
             
             mediaRecorder.onstop = () => {
+                // 创建Blob，使用更兼容的类型
                 const blob = new Blob(recordedChunks, { type: mimeType });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 const now = new Date();
                 const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
                 
+                // 根据编码格式决定文件扩展名
                 const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
                 a.download = `watermark_${timestamp}.${extension}`;
                 a.href = url;
@@ -925,6 +927,7 @@
                 a.click();
                 document.body.removeChild(a);
                 
+                // 延迟释放URL
                 setTimeout(() => {
                     URL.revokeObjectURL(url);
                 }, 1000);
@@ -979,8 +982,11 @@
                 }
             };
             
+            // 开始播放视频
             await videoPlayer.play();
-            mediaRecorder.start(1000);
+            
+            // 开始录制
+            mediaRecorder.start(1000); // 每秒收集一次数据
             isRecording = true;
             exportBtn.disabled = true;
             stopBtn.disabled = false;
@@ -989,18 +995,24 @@
             statusMsg.innerHTML = '🎬 录制中... 请勿关闭页面';
             recordStatus.innerHTML = '录制中';
             
+            // 动画循环：绘制每一帧
+            let lastTimestamp = 0;
             function drawFrame(timestamp) {
                 if (!isRecording) return;
                 
                 if (!videoPlayer.paused && !videoPlayer.ended && videoPlayer.duration > 0) {
+                    // 绘制视频帧
                     ctx.drawImage(videoPlayer, 0, 0, captureCanvas.width, captureCanvas.height);
+                    // 绘制水印
                     drawAllWatermarks(ctx, captureCanvas, videoPlayer.currentTime);
                     
+                    // 更新进度
                     const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
                     progressFill.style.width = `${progress}%`;
                     recordProgress.innerHTML = `${Math.floor(progress)}%`;
                     
                     if (videoPlayer.currentTime >= videoPlayer.duration - 0.05) {
+                        // 视频结束，停止录制
                         setTimeout(() => stopRecording(), 200);
                         return;
                     }
